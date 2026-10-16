@@ -1,9 +1,9 @@
-export function norm(v) {
+export function normVec(v) {
     return Math.sqrt(v[0] * v[0] + v[1] * v[1]);
 }
 
 export function dist(a, b) {
-    return norm([a[0] - b[0], a[1] - b[1]]);
+    return normVec([a[0] - b[0], a[1] - b[1]]);
 }
 
 export function normalise(v) {
