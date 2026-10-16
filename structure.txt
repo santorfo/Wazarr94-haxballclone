@@ -1,0 +1,117 @@
+﻿
+LineNumber Line                                                                     
+---------- ----                                                                     
+        10 var canvas = document.getElementById('canvas_div');                      
+        11 var ctx = canvas.getContext('2d', { alpha: true });                      
+        13 var margin = 0;                                                          
+        14 var reloadCheck = false;                                                 
+        15 var lastTick = 0;                                                        
+        17 var goalSound = new Audio("audio/goal.mp3");                             
+        22 var bg_patterns = {};                                                    
+        26 var canvas_rect = [-150, -75, 150, 75];                                  
+        30 function Player() {}                                                     
+        31 function Disc() {}                                                       
+        32 function Game() {}                                                       
+       140 var haxball = {                                                          
+       235 var zoom_levels = [0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5];              
+       236 var zoom = zoom_levels[4];                                               
+       238 const Input = { LEFT: 2, RIGHT: 8, UP: 1, DOWN: 4, SHOOT: 16 };          
+       239 const Kick = {                                                           
+       249 const Team = {                                                           
+       255 var stadium = JSON.parse(                                                
+       258 var stadiumP = JSON.parse(                                               
+       261 var stadium2 = JSON.parse(                                               
+       264 var stadiumF = JSON.parse(                                               
+       268 var stadium_copy = JSON.parse(JSON.stringify(stadium));                  
+       269 var cameraFollowMode = 0;                                                
+       270 var cameraFollow = { x: 0, y: 0 };                                       
+       271 var currentFrame = -1;                                                   
+       272 var playerRadius = 15;                                                   
+       274 var discs = stadium_copy.discs;                                          
+       287 var ballPhysics = stadium_copy.ballPhysics || {};                        
+       293 var vertexes = stadium_copy.vertexes;                                    
+       306 var segments = stadium_copy.segments;                                    
+       321 var planes = stadium_copy.planes;                                        
+       334 var goals = stadium_copy.goals;                                          
+       341 var game = new Game();                                                   
+       347 var scorableDiscsId = (function () {                                     
+       353 var scorableDiscsPos = (function () {                                    
+       362 var myEl = document.getElementById('load_last');                         
+       365 var input = document.getElementById('input');                            
+       367 var fileread = new FileReader();                                         
+       370 var recCheck =                                                           
+       375 var playersArray = [];                                                   
+       376 var arrayRec = [];                                                       
+       377 var kickArray = [];                                                      
+       378 var triggerDistance = 15 + 10 + 0.01;                                    
+       435 var inputArrayCurr = playersArray.map((p) => [                           
+       442 function BallKick(                                                       
+       460 function ConeElement(                                                    
+       484 function getTeamByID(id) {                                               
+       492 function downloadFile(file, fileName) {                                  
+       504 function downloadRec(rec, fileName) {                                    
+       513 function saveRecording(rec) {                                            
+       523 function watchLastGame() {                                               
+       530 function handleFile() {                                                  
+       535 function loadFileRec() {                                                 
+       542 function createNickCanvas() {                                            
+       550 function createAvatarCanvas() {                                          
+       558 function checkKick(player) {                                             
+       563 function getRGBA(a) {                                                    
+       571 function getInputs(a, b, c, d, e) {                                      
+       575 function getDecimalFromRGB(a) {                                          
+       580 function getAvatarPattern(ctx, avatar, colors) {                         
+       605 function drawPlayerDisc(player) {                                        
+       631 function drawPlayerDiscExtLine(player) {                                 
+       650 function drawTextNickCanvas(ctx, nickname) {                             
+       667 function insertNickCanvasGlobalCanvas(globalCtx, nickCtx, x, y) {        
+       672 function setDiscDefaultProperties(currentDisc, defaultDisc) {            
+       685 function setPlayerDefaultProperties(player) {                            
+       728 function setCameraFollow(playerPos, widthCanvas, heightCanvas, refresh) {
+       760 function checkCameraLimits(widthCanvas, heightCanvas, stadium) {         
+       782 function resetPositionDiscs() {                                          
+       805 function keyDownHandler(e) {                                             
+       821 function keyUpHandler(e) {                                               
+       831 function collisionTransformation(physics, vertexes = null) {             
+       866 function getCurveFSegment(segment) {                                     
+       883 function getStuffSegment(segment) {                                      
+       920 function load_tile(name) {                                               
+       930 function resolvePlayerMovement(player) {                                 
+      1009 function resolveDVCollision(disc, vertex) {                              
+      1032 function resolveDSCollision(disc, segment) {                             
+      1104 function resolveDPCollision(disc, plane) {                               
+      1122 function resolveDDCollision(discA, discB) {                              
+      1148 function checkGoal(discPos, discPosPrev) {                               
+      1186 function endAnimation() {                                                
+      1191 function updateBar() {                                                   
+      1217 function draw() {                                                        
+      1391 function Shape(type, object, i) {                                        
+      1395 function color_to_style(color, def) {                                    
+      1405 function norm(v) {                                                       
+      1409 function dist(a, b) {                                                    
+      1413 function normalise(v) {                                                  
+      1420 function render(st) {                                                    
+      1494 function renderCones() {                                                 
+      1562 function renderbg(stadium, ctx) {                                        
+      1635 function for_all_shapes(st, types, f) {                                  
+      1650 function resize_canvas() {                                               
+      1694 function stepStat(stadiumDiscs, frameNumber) {                           
+      1801 function checkPointInCone(cone, point) {                                 
+      1878 function checkPointInRectangle(point, rectangle) {                       
+      1901 function checkPointInTriangle(point, triangle) {                         
+      1917 function checkSegmentInCone(cone, segL, segR) {                          
+      1992 function calculateConeAndType(discs, player) {                           
+      2011 function calculateCone(position, speed, frame) {                         
+      2057 function deepEqual(x, y) {                                               
+      2067 function getTypeKick() {                                                 
+      2205 function radianToDegree(x) {                                             
+      2209 function degreeToRadian(x) {                                             
+      2213 function getAngle(x, y) {                                                
+      2217 function getAngleVec(vec1, vec2) {                                       
+      2223 function getVectorAngle(x, y, angle) {                                   
+      2230 function normArr(v) {                                                    
+      2234 function normObj(v) {                                                    
+      2238 function pointDistance(p1, p2) {                                         
+      2244 function predictPositionBall(position, speed, frames) {                  
+
+

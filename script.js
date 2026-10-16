@@ -5,6 +5,12 @@
 // TODO : Menu
 // TODO : Improve recording system
 
+import { norm, dist, normalise,
+  radianToDegree, degreeToRadian,
+  getAngle, getAngleVec, getVectorAngle,
+  normArr, normObj, pointDistance,
+  deepEqual } from './src/util/MathUtils.js';
+
 if (localStorage.getItem('rec') == null) localStorage.setItem('rec', '0');
 
 var canvas = document.getElementById('canvas_div');
@@ -548,6 +554,7 @@ function createNickCanvas() {
 }
 
 function createAvatarCanvas() {
+    let avatarCanvasCtx;
     // canvas for avatar
     var a = window.document.createElement('canvas');
     a.width = 64;
@@ -750,7 +757,7 @@ function setCameraFollow(playerPos, widthCanvas, heightCanvas, refresh) {
     }
     frames = 60 * refresh;
     if (frames > 1) frames = 1;
-    smoothingRatio = 0.04;
+    var smoothingRatio = 0.04;
     frames *= smoothingRatio;
     cameraFollow.x += (centerX - cameraFollow.x) * frames;
     cameraFollow.y += (centerY - cameraFollow.y) * frames;
@@ -784,17 +791,17 @@ function resetPositionDiscs() {
     setDiscDefaultProperties(discs[0], stadium.discs[0]); // TODO : full kickoffReset
     var teamArray = [0, 0, 0];
     for (var i = 0; i < playersArray.length; i++) {
-        player = playersArray[i];
+        var player = playersArray[i];
         setPlayerDefaultProperties(player);
-        teamP = player.team;
+        var teamP = player.team;
         if (teamP !== haxball.Team.SPECTATORS) {
             // TODO : teamSpawnPoints
             var f = player.disc;
             var valueArr = teamArray[teamP.id];
             var lambda = (valueArr + 1) >> 1;
             if (valueArr % 2 == 1) lambda = -lambda;
-            pos_x = stadium.spawnDistance * (2 * teamP.id - 3); // +- spawnDistance
-            pos_y = 55 * lambda;
+            var pos_x = stadium.spawnDistance * (2 * teamP.id - 3); // +- spawnDistance
+            var pos_y = 55 * lambda;
             f.x = pos_x;
             f.y = pos_y;
             teamArray[teamP.id]++;
@@ -1043,7 +1050,7 @@ function resolveDSCollision(disc, segment) {
         var dist0_y = discPos.y - v0Pos.y;
         var dist1_x = discPos.x - v1Pos.x;
         var dist1_y = discPos.y - v1Pos.y;
-        g = { x: disc.x, y: disc.y };
+        var g = { x: disc.x, y: disc.y };
         if (
             dist0_x * seg_x + dist0_y * seg_y > 0 && dist1_x * seg_x + dist1_y * seg_y < 0
         ) {
@@ -1135,7 +1142,7 @@ function resolveDDCollision(discA, discB) {
         var normalVelocity = relativeVelocity[0] * normal[0] + relativeVelocity[1] * normal[1];
 
         if (normalVelocity < 0) {
-            speedFactor = normalVelocity * (discA.bCoef * discB.bCoef + 1);
+            var speedFactor = normalVelocity * (discA.bCoef * discB.bCoef + 1);
             
             discA.xspeed = discA.xspeed - normal[0] * speedFactor * massFactor;
             discA.yspeed = discA.yspeed - normal[1] * speedFactor * massFactor;
@@ -1364,7 +1371,7 @@ function draw() {
                 if (!recCheck) {
                     inputArrayCurr = [game.kickoffReset, inputArrayCurr];
                     localStorage.setItem('last', JSON.stringify(inputArrayCurr));
-                    recordingFinal = msgpack.serialize(inputArrayCurr)
+                    var recordingFinal = msgpack.serialize(inputArrayCurr)
                     saveRecording(recordingFinal);
                 }
                 document.location.reload(true);
@@ -1402,22 +1409,8 @@ function color_to_style(color, def) {
     }
 }
 
-function norm(v) {
-    return Math.sqrt(v[0] * v[0] + v[1] * v[1]);
-}
-
-function dist(a, b) {
-    return norm([a[0] - b[0], a[1] - b[1]]);
-}
-
-function normalise(v) {
-    var k = Math.sqrt(v[0] * v[0] + v[1] * v[1]);
-    var x = v[0] / (k || 1);
-    var y = v[1] / (k || 1);
-    return [x, y];
-}
-
 function render(st) {
+    if (!playersArray.length) return;
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(
         0,
@@ -2054,16 +2047,6 @@ function calculateCone(position, speed, frame) {
     return coneElement;
 }
 
-function deepEqual(x, y) {
-    const ok = Object.keys,
-        tx = typeof x,
-        ty = typeof y;
-    return x && y && tx === 'object' && tx === ty
-        ? ok(x).length === ok(y).length &&
-              ok(x).every((key) => deepEqual(x[key], y[key]))
-        : x === y;
-}
-
 function getTypeKick() {
     /** TODO:
      * Improve shot: currently too wide
@@ -2200,45 +2183,6 @@ function getTypeKick() {
     }
 
     console.log(stringArray.join(' '));
-}
-
-function radianToDegree(x) {
-    return x * (180 / Math.PI);
-}
-
-function degreeToRadian(x) {
-    return x * (Math.PI / 180);
-}
-
-function getAngle(x, y) {
-    return radianToDegree(Math.atan2(y, x));
-}
-
-function getAngleVec(vec1, vec2) {
-    return radianToDegree(
-        Math.atan2(vec2.y, vec2.x) - Math.atan2(vec1.y, vec1.x)
-    );
-}
-
-function getVectorAngle(x, y, angle) {
-    return {
-        x: x * Math.cos(angle) + y * Math.sin(angle),
-        y: y * Math.cos(angle) - x * Math.sin(angle),
-    };
-}
-
-function normArr(v) {
-    return Math.sqrt(v[0] * v[0] + v[1] * v[1]);
-}
-
-function normObj(v) {
-    return Math.sqrt(v.x * v.x + v.y * v.y);
-}
-
-function pointDistance(p1, p2) {
-    var d1 = p1.x - p2.x;
-    var d2 = p1.y - p2.y;
-    return Math.sqrt(d1 * d1 + d2 * d2);
 }
 
 function predictPositionBall(position, speed, frames) {
