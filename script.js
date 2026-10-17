@@ -27,6 +27,8 @@ import {
     resolveDVCollision, resolveDSCollision, resolveDPCollision, resolveDDCollision
 } from './src/systems/Physics.js';
 
+import { checkGoal, endAnimation, updateBar } from './src/systems/Score.js';
+
 import { saveRecording, loadFileRec, downloadRec, downloadFile, watchLastGame, handleFile } from './src/systems/Recording.js';
 
 if (localStorage.getItem('rec') == null) localStorage.setItem('rec', '0');
@@ -37,8 +39,6 @@ var ctx = canvas.getContext('2d', { alpha: true });
 var margin = 0;
 var reloadCheck = false;
 var lastTick = 0;
-
-var goalSound = new Audio("audio/goal.mp3");
 
 //==== Program State
 
@@ -171,11 +171,11 @@ input.addEventListener('change', handleFile, false);
 var fileread = new FileReader();
 fileread.addEventListener('loadend', loadFileRec, false);
 
-var recCheck =
-    (localStorage.getItem('rec') === '1' &&
-        localStorage.getItem('last') != null) ||
-    (localStorage.getItem('rec') === '2' &&
-        localStorage.getItem('file') != null);
+var recCheck = false;
+    // (localStorage.getItem('rec') === '1' &&
+    //     localStorage.getItem('last') != null) ||
+    // (localStorage.getItem('rec') === '2' &&
+    //     localStorage.getItem('file') != null);
 var playersArray = [];
 var arrayRec = [];
 var kickArray = [];
@@ -603,75 +603,6 @@ function resolvePlayerMovement(player) {
     }
 }
 
-function checkGoal(discPos, discPosPrev) {
-    // discPos : current position of scorable disc, discPosPrev : position just before
-    if (stadium.goals == undefined) return haxball.Team.SPECTATORS;
-    for (var i = 0; i < stadium.goals.length; i++) {
-        var check;
-        var goal = stadium.goals[i];
-        var point0 = goal.p0;
-        var point1 = goal.p1;
-        var dist_x = discPosPrev[0] - discPos[0];
-        var dist_y = discPosPrev[1] - discPos[1];
-        if (
-            (-(point0[1] - discPos[1]) * dist_x + (point0[0] - discPos[0]) * dist_y) *
-            (-(point1[1] - discPos[1]) * dist_x + (point1[0] - discPos[0]) * dist_y) > 0
-        ) {
-            check = false;
-        } else {
-            var goal_x = point1[0] - point0[0];
-            var goal_y = point1[1] - point0[1];
-            if (
-                (-(discPos[1] - point0[1]) * goal_x +
-                    (discPos[0] - point0[0]) * goal_y) *
-                    (-(discPosPrev[1] - point0[1]) * goal_x +
-                        (discPosPrev[0] - point0[0]) * goal_y) >
-                0
-            ) {
-                check = false;
-            } else {
-                check = true;
-            }
-        }
-        if (check) {
-            goalSound.play();
-            return goal.team;
-        }
-    }
-    return haxball.Team.SPECTATORS;
-}
-
-function endAnimation() {
-    game.state = 3;
-    game.timeout = 300;
-}
-
-function updateBar() {
-    var a = Math.floor(game.time),
-        b = a % 60,
-        c = (a / 60) | 0,
-        spans = document.getElementsByClassName('digit');
-    spans[3].textContent = '' + (b % 10);
-    spans[2].textContent = '' + (((b / 10) | 0) % 10);
-    spans[1].textContent = '' + (c % 10);
-    spans[0].textContent = '' + (((c / 10) | 0) % 10);
-    if (game.time > 60 * game.timeLimit - 30) {
-        var span = document.getElementsByClassName('game-timer-view');
-        span[0].className = 'game-timer-view time-warn';
-    }
-    if (game.time > 60 * game.timeLimit) {
-        var span = document.getElementsByClassName('game-timer-view time-warn');
-        span[0].className = 'game-timer-view';
-        span = document.getElementsByClassName('overtime');
-        span[0].className = 'overtime on';
-    }
-    if (game.timeout > 0) {
-        var scores = document.getElementsByClassName('score');
-        scores[1].textContent = '' + game.blue;
-        scores[0].textContent = '' + game.red;
-    }
-}
-
 function draw() {
     
 
@@ -770,7 +701,7 @@ function draw() {
             var scoreTeam = haxball.Team.SPECTATORS;
             for (var i = 0; i < scoreIndex; i++) {
                 scoreTeam = checkGoal(
-                    [discs[scorableDiscsId[i]].x, discs[scorableDiscsId[i]].y],
+                    stadium, [discs[scorableDiscsId[i]].x, discs[scorableDiscsId[i]].y],
                     scorableDiscsPos[i]
                 );
                 if (scoreTeam != haxball.Team.SPECTATORS) break;
@@ -796,7 +727,7 @@ function draw() {
                     game.time >= 60 * game.timeLimit &&
                     game.red != game.blue
                 ) {
-                    endAnimation();
+                    endAnimation(game);
                 }
             }
         } else if (game.state == 2) {
@@ -811,7 +742,7 @@ function draw() {
                         game.time >= 60 * game.timeLimit &&
                         game.red != game.blue)
                 ) {
-                    endAnimation();
+                    endAnimation(game);
                 } else {
                     resetPositionDiscs();
                 }
@@ -842,7 +773,7 @@ function draw() {
             }
         }
 
-        updateBar();
+        updateBar(game);
         resize_canvas();
 }
 
@@ -1220,6 +1151,7 @@ function stepStat(stadiumDiscs, frameNumber) {
     var scoreTeam = haxball.Team.SPECTATORS;
     for (var i = 0; i < scoreIndex; i++) {
         scoreTeam = checkGoal(
+            stadium,
             [discs[scorableDiscsId[i]].x, discs[scorableDiscsId[i]].y],
             scorableDiscsPos[i]
         );
