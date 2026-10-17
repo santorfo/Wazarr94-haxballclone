@@ -22,6 +22,11 @@ import {
     drawTextNickCanvas, createAvatarCanvas
 } from './src/render/AvatarUtils.js';
 
+import {
+    collisionTransformation, getCurveFSegment, getStuffSegment,
+    resolveDVCollision, resolveDSCollision, resolveDPCollision, resolveDDCollision
+} from './src/systems/Physics.js';
+
 import { saveRecording, loadFileRec, downloadRec, downloadFile, watchLastGame, handleFile } from './src/systems/Recording.js';
 
 if (localStorage.getItem('rec') == null) localStorage.setItem('rec', '0');
@@ -46,6 +51,10 @@ var canvas_rect = [-150, -75, 150, 75];
 
 
 var zoom = zoom_levels[4];
+
+// var stadium = JSON.parse(
+//     `{"name":"WWF Ranger Field","width":800,"height":350,"bg":{"type":"hockey","width":700,"height":320,"kickOffRadius":80},"vertexes":[{"x":-700,"y":320,"cMask":["ball"]},{"x":-700,"y":-320,"cMask":["ball"]},{"x":700,"y":320,"cMask":["ball"]},{"x":700,"y":-320,"cMask":["ball"]},{"x":0,"y":350,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"x":0,"y":80,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"x":0,"y":-80,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"x":0,"y":-350,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"x":-700,"y":-85,"bCoef":0.1,"cMask":["ball"]},{"x":-750,"y":-85,"bCoef":0.1,"cMask":["ball"]},{"x":-750,"y":85,"bCoef":0.1,"cMask":["ball"]},{"x":-700,"y":85,"bCoef":0.1,"cMask":["ball"]},{"x":700,"y":-85,"bCoef":0.1,"cMask":["ball"]},{"x":750,"y":-85,"bCoef":0.1,"cMask":["ball"]},{"x":750,"y":85,"bCoef":0.1,"cMask":["ball"]},{"x":700,"y":85,"bCoef":0.1,"cMask":["ball"]},{"x":-700,"y":85,"bCoef":1.25,"cMask":["ball"]},{"x":-700,"y":320,"bCoef":1.25,"cMask":["ball"]},{"x":-700,"y":-85,"bCoef":1.25,"cMask":["ball"]},{"x":-700,"y":-320,"bCoef":1.25,"cMask":["ball"]},{"x":-700,"y":320,"bCoef":2,"cMask":["ball"]},{"x":700,"y":320,"bCoef":2,"cMask":["ball"]},{"x":700,"y":85,"bCoef":1.25,"cMask":["ball"]},{"x":700,"y":320,"bCoef":1.25,"cMask":["ball"]},{"x":700,"y":-320,"bCoef":1.25,"cMask":["ball"]},{"x":700,"y":-85,"bCoef":1.25,"cMask":["ball"]},{"x":700,"y":-320,"bCoef":0,"cMask":["ball"]},{"x":700,"y":-320,"bCoef":0,"cMask":["ball"]},{"x":-700,"y":-320,"bCoef":2,"cMask":["ball"]},{"x":700,"y":-320,"bCoef":2,"cMask":["ball"]},{"x":0,"y":-320,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"x":0,"y":-80,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"x":0,"y":80,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"x":0,"y":320,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"x":0,"y":-80,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"x":0,"y":80,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"x":0,"y":80,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"x":0,"y":-80,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"x":0,"y":80,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"x":0,"y":-80,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"x":-700,"y":95,"cMask":["ball"]},{"x":-700,"y":320,"cMask":["ball"]},{"x":-700,"y":-316,"cMask":["ball"]},{"x":-700,"y":-89,"cMask":["ball"]},{"x":700,"y":-316,"cMask":["ball"]},{"x":700,"y":-89,"cMask":["ball"]},{"x":700,"y":95,"cMask":["ball"]},{"x":700,"y":320,"cMask":["ball"]},{"x":-700,"y":320,"cMask":["ball"]},{"x":-700,"y":-320,"cMask":["ball"]},{"x":700,"y":320,"cMask":["ball"]},{"x":700,"y":-320,"cMask":["ball"]},{"x":0,"y":350,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"x":0,"y":80,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"x":0,"y":-80,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"x":0,"y":-350,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"x":-700,"y":-85,"bCoef":0.1,"cMask":["ball"]},{"x":-750,"y":-85,"bCoef":0.1,"cMask":["ball"]},{"x":-750,"y":85,"bCoef":0.1,"cMask":["ball"]},{"x":-700,"y":85,"bCoef":0.1,"cMask":["ball"]},{"x":700,"y":-85,"bCoef":0.1,"cMask":["ball"]},{"x":750,"y":-85,"bCoef":0.1,"cMask":["ball"]},{"x":750,"y":85,"bCoef":0.1,"cMask":["ball"]},{"x":700,"y":85,"bCoef":0.1,"cMask":["ball"]},{"x":-700,"y":85,"bCoef":1.25,"cMask":["ball"]},{"x":-700,"y":320,"bCoef":1.25,"cMask":["ball"]},{"x":-700,"y":-85,"bCoef":1.25,"cMask":["ball"]},{"x":-700,"y":-320,"bCoef":1.25,"cMask":["ball"]},{"x":-700,"y":320,"bCoef":2,"cMask":["ball"]},{"x":700,"y":320,"bCoef":2,"cMask":["ball"]},{"x":700,"y":85,"bCoef":1.25,"cMask":["ball"]},{"x":700,"y":320,"bCoef":1.25,"cMask":["ball"]},{"x":700,"y":-320,"bCoef":1.25,"cMask":["ball"]},{"x":700,"y":-85,"bCoef":1.25,"cMask":["ball"]},{"x":700,"y":-320,"bCoef":0,"cMask":["ball"]},{"x":700,"y":-320,"bCoef":0,"cMask":["ball"]},{"x":-700,"y":-320,"bCoef":2,"cMask":["ball"]},{"x":700,"y":-320,"bCoef":2,"cMask":["ball"]},{"x":0,"y":-320,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"x":0,"y":-80,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"x":0,"y":80,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"x":0,"y":320,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"x":0,"y":-80,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"x":0,"y":80,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"x":0,"y":80,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"x":0,"y":-80,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"x":0,"y":80,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"x":0,"y":-80,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"x":-700,"y":320,"cMask":["ball"]},{"x":-700,"y":-320,"cMask":["ball"]},{"x":700,"y":320,"cMask":["ball"]},{"x":700,"y":-320,"cMask":["ball"]},{"x":0,"y":350,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"x":0,"y":80,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"x":0,"y":-80,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"x":0,"y":-350,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"x":-700,"y":-85,"bCoef":0.1,"cMask":["ball"]},{"x":-750,"y":-85,"bCoef":0.1,"cMask":["ball"]},{"x":-750,"y":85,"bCoef":0.1,"cMask":["ball"]},{"x":-700,"y":85,"bCoef":0.1,"cMask":["ball"]},{"x":700,"y":-85,"bCoef":0.1,"cMask":["ball"]},{"x":750,"y":-85,"bCoef":0.1,"cMask":["ball"]},{"x":750,"y":85,"bCoef":0.1,"cMask":["ball"]},{"x":700,"y":85,"bCoef":0.1,"cMask":["ball"]},{"x":-700,"y":85,"bCoef":1.25,"cMask":["ball"]},{"x":-700,"y":320,"bCoef":1.25,"cMask":["ball"]},{"x":-700,"y":-85,"bCoef":1.25,"cMask":["ball"]},{"x":-700,"y":-320,"bCoef":1.25,"cMask":["ball"]},{"x":-700,"y":320,"bCoef":2,"cMask":["ball"]},{"x":700,"y":320,"bCoef":2,"cMask":["ball"]},{"x":700,"y":85,"bCoef":1.25,"cMask":["ball"]},{"x":700,"y":320,"bCoef":1.25,"cMask":["ball"]},{"x":700,"y":-320,"bCoef":1.25,"cMask":["ball"]},{"x":700,"y":-85,"bCoef":1.25,"cMask":["ball"]},{"x":700,"y":-320,"bCoef":0,"cMask":["ball"]},{"x":700,"y":-320,"bCoef":0,"cMask":["ball"]},{"x":-700,"y":-320,"bCoef":2,"cMask":["ball"]},{"x":700,"y":-320,"bCoef":2,"cMask":["ball"]},{"x":0,"y":-320,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"x":0,"y":-80,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"x":0,"y":80,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"x":0,"y":320,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"x":0,"y":-80,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"x":0,"y":80,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"x":0,"y":80,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"x":0,"y":-80,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"x":0,"y":80,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"x":0,"y":-80,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"x":-700,"y":320,"cMask":["ball"]},{"x":-700,"y":-320,"cMask":["ball"]},{"x":700,"y":320,"cMask":["ball"]},{"x":700,"y":-320,"cMask":["ball"]},{"x":0,"y":350,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"x":0,"y":80,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"x":0,"y":-80,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"x":0,"y":-350,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"x":-700,"y":-85,"bCoef":0.1,"cMask":["ball"]},{"x":-750,"y":-85,"bCoef":0.1,"cMask":["ball"]},{"x":-750,"y":85,"bCoef":0.1,"cMask":["ball"]},{"x":-700,"y":85,"bCoef":0.1,"cMask":["ball"]},{"x":700,"y":-85,"bCoef":0.1,"cMask":["ball"]},{"x":750,"y":-85,"bCoef":0.1,"cMask":["ball"]},{"x":750,"y":85,"bCoef":0.1,"cMask":["ball"]},{"x":700,"y":85,"bCoef":0.1,"cMask":["ball"]},{"x":-700,"y":85,"bCoef":2,"cMask":["ball"],"cGroup":["ball"]},{"x":-700,"y":320,"bCoef":2,"cMask":["ball"],"cGroup":["ball"]},{"x":-700,"y":-85,"bCoef":2,"cMask":["ball"],"cGroup":["ball"]},{"x":-700,"y":-320,"bCoef":2,"cMask":["ball"],"cGroup":["ball"]},{"x":-700,"y":320,"bCoef":2,"cMask":["ball"]},{"x":700,"y":320,"bCoef":2,"cMask":["ball"]},{"x":700,"y":85,"bCoef":2,"cMask":["ball"]},{"x":700,"y":320,"bCoef":2,"cMask":["ball"]},{"x":700,"y":-320,"bCoef":2,"cMask":["ball"]},{"x":700,"y":-85,"bCoef":2,"cMask":["ball"]},{"x":700,"y":-320,"bCoef":0,"cMask":["ball"]},{"x":700,"y":-320,"bCoef":0,"cMask":["ball"]},{"x":-700,"y":-320,"bCoef":2,"cMask":["ball"]},{"x":700,"y":-320,"bCoef":2,"cMask":["ball"]},{"x":0,"y":-320,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"x":0,"y":-80,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"x":0,"y":80,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"x":0,"y":320,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"x":0,"y":-80,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"x":0,"y":80,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"x":0,"y":80,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"x":0,"y":-80,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"x":0,"y":80,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"x":0,"y":-80,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"x":-705,"y":-85,"bCoef":2,"cMask":["ball"]},{"x":1,"y":-79,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"x":0,"y":81,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"x":-700,"y":-266,"bCoef":0,"cMask":[]},{"x":-444,"y":-69,"bCoef":0,"cMask":[]},{"x":700,"y":-266,"bCoef":0,"cMask":[]},{"x":444,"y":-69,"bCoef":0,"cMask":[]},{"x":-700,"y":266,"bCoef":2,"cMask":[]},{"x":-444,"y":60,"bCoef":0,"cMask":[]},{"x":700,"y":266,"bCoef":0,"cMask":[]},{"x":444,"y":58,"bCoef":0,"cMask":[]},{"x":-405,"y":3,"bCoef":0.1,"cMask":[]},{"x":-405,"y":1,"bCoef":0.1,"cMask":[]},{"x":-405,"y":5,"bCoef":0.1,"cMask":[]},{"x":-405,"y":-1,"bCoef":0.1,"cMask":[]},{"x":-405,"y":0,"bCoef":0.1,"cMask":[]},{"x":-405,"y":4,"bCoef":0.1,"cMask":[]},{"x":-405,"y":-1.5,"bCoef":0.1,"cMask":[]},{"x":-405,"y":5.5,"bCoef":0.1,"cMask":[]},{"x":405,"y":3,"bCoef":0.1,"cMask":[]},{"x":405,"y":1,"bCoef":0.1,"cMask":[]},{"x":405,"y":5,"bCoef":0.1,"cMask":[]},{"x":405,"y":-1,"bCoef":0.1,"cMask":[]},{"x":405,"y":0,"bCoef":0.1,"cMask":[]},{"x":405,"y":4,"bCoef":0.1,"cMask":[]},{"x":405,"y":-1.5,"bCoef":0.1,"cMask":[]},{"x":405,"y":5.5,"bCoef":0.1,"cMask":[]},{"x":-700,"y":95,"cMask":["ball"]},{"x":-700,"y":320,"cMask":["ball"]},{"x":-700,"y":95,"bCoef":2,"cMask":["ball"]},{"x":-700,"y":320,"bCoef":2,"cMask":["ball"]},{"x":-700,"y":-316,"cMask":["ball"]},{"x":-700,"y":-89,"cMask":["ball"]},{"x":-700,"y":-316,"bCoef":2,"cMask":["ball"]},{"x":-700,"y":-89,"bCoef":2,"cMask":["ball"]},{"x":700,"y":-316,"cMask":["ball"]},{"x":700,"y":-89,"cMask":["ball"]},{"x":700,"y":-316,"bCoef":2,"cMask":["ball"]},{"x":700,"y":-89,"bCoef":2,"cMask":["ball"]},{"x":700,"y":95,"cMask":["ball"]},{"x":700,"y":320,"cMask":["ball"]},{"x":700,"y":95,"bCoef":2,"cMask":["ball"]},{"x":700,"y":320,"bCoef":2,"cMask":["ball"]},{"x":-707,"y":87,"bCoef":1.5,"cMask":["ball"],"cGroup":["ball"]},{"x":-707,"y":318,"bCoef":1.5,"cMask":["ball"],"cGroup":["ball"]},{"x":-707,"y":-320,"bCoef":1.5,"cMask":["ball"],"cGroup":["ball"]},{"x":-707,"y":-89,"bCoef":1.5,"cMask":["ball"],"cGroup":["ball"]},{"x":707,"y":-320,"bCoef":1.5,"cMask":["ball"],"cGroup":["ball"]},{"x":707,"y":-89,"bCoef":1.5,"cMask":["ball"],"cGroup":["ball"]},{"x":707,"y":86,"bCoef":1.5,"cMask":["ball"],"cGroup":["ball"]},{"x":707,"y":317,"bCoef":1.5,"cMask":["ball"],"cGroup":["ball"]},{"x":0,"y":-178,"bCoef":0,"cMask":[]},{"x":0,"y":190,"bCoef":0,"cMask":[]},{"x":0,"y":-178,"bCoef":0,"cMask":[]},{"x":0,"y":190,"bCoef":0,"cMask":[]},{"x":-1,"y":-2,"bCoef":0,"cMask":[]},{"x":-1,"y":-2,"bCoef":0,"cMask":[]},{"x":0,"y":-179,"bCoef":0,"cMask":[]},{"x":0,"y":190,"bCoef":0,"cMask":[]},{"x":0,"y":-179,"bCoef":0,"cMask":[]},{"x":0,"y":190,"bCoef":0,"cMask":[]},{"x":-53,"y":-32,"bCoef":0,"cMask":[]},{"x":-40,"y":36,"bCoef":0,"cMask":[]},{"x":-35,"y":1,"bCoef":0,"cMask":[]},{"x":-40,"y":37,"bCoef":0,"cMask":[]},{"x":-22,"y":-30,"bCoef":0,"cMask":[]},{"x":-29,"y":37,"bCoef":0,"cMask":[]},{"x":-35,"y":0,"bCoef":0,"cMask":[]},{"x":-29,"y":38,"bCoef":0,"cMask":[]},{"x":-19,"y":-30,"bCoef":0,"cMask":[]},{"x":-6,"y":38,"bCoef":0,"cMask":[]},{"x":-1,"y":3,"bCoef":0,"cMask":[]},{"x":-6,"y":39,"bCoef":0,"cMask":[]},{"x":12,"y":-28,"bCoef":0,"cMask":[]},{"x":5,"y":39,"bCoef":0,"cMask":[]},{"x":-1,"y":2,"bCoef":0,"cMask":[]},{"x":5,"y":40,"bCoef":0,"cMask":[]},{"x":24,"y":-26,"bCoef":0,"cMask":[]},{"x":17,"y":41,"bCoef":0,"cMask":[]},{"x":24,"y":-26,"bCoef":0,"cMask":[]},{"x":48,"y":-23,"bCoef":0,"cMask":[]},{"x":20,"y":6,"bCoef":0,"cMask":[]},{"x":40,"y":8,"bCoef":0,"cMask":[]}],"segments":[{"v0":8,"v1":9,"bCoef":0.1,"cMask":["ball"],"color":"F8F8F8"},{"v0":9,"v1":10,"bCoef":0.1,"cMask":["ball"],"color":"F8F8F8"},{"v0":10,"v1":11,"bCoef":0.1,"cMask":["ball"],"color":"F8F8F8"},{"v0":12,"v1":13,"bCoef":0.1,"cMask":["ball"],"color":"F8F8F8"},{"v0":13,"v1":14,"bCoef":0.1,"cMask":["ball"],"color":"F8F8F8"},{"v0":14,"v1":15,"bCoef":0.1,"cMask":["ball"],"color":"F8F8F8"},{"v0":4,"v1":5,"bCoef":0.1,"vis":false,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"v0":5,"v1":6,"bCoef":0.1,"curve":180,"curveF":6.123233995736766e-17,"cMask":["red","blue"],"cGroup":["blueKO"],"color":"F8F8F8"},{"v0":6,"v1":5,"bCoef":0.1,"curve":180,"curveF":6.123233995736766e-17,"cMask":["red","blue"],"cGroup":["redKO"],"color":"F8F8F8"},{"v0":6,"v1":7,"bCoef":0.1,"vis":false,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"v0":16,"v1":17,"bCoef":1.25,"cMask":["ball"],"color":"F8F8F8"},{"v0":18,"v1":19,"bCoef":1.25,"cMask":["ball"],"color":"F8F8F8"},{"v0":20,"v1":21,"bCoef":2,"cMask":["ball"],"color":"F8F8F8"},{"v0":22,"v1":23,"bCoef":1.25,"cMask":["ball"],"color":"F8F8F8"},{"v0":24,"v1":25,"bCoef":1.25,"cMask":["ball"],"color":"F8F8F8"},{"v0":26,"v1":27,"bCoef":0,"cMask":["ball"],"color":"F8F8F8"},{"v0":28,"v1":29,"bCoef":2,"cMask":["ball"],"color":"F8F8F8"},{"v0":30,"v1":31,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"],"color":"F8F8F8"},{"v0":32,"v1":33,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"],"color":"F8F8F8"},{"v0":40,"v1":41,"vis":false,"cMask":["ball"],"color":"F8F8F8"},{"v0":42,"v1":43,"vis":false,"cMask":["ball"],"color":"F8F8F8"},{"v0":44,"v1":45,"vis":false,"cMask":["ball"],"color":"F8F8F8"},{"v0":46,"v1":47,"vis":false,"cMask":["ball"],"color":"F8F8F8"},{"v0":56,"v1":57,"bCoef":0.1,"cMask":["ball"],"color":"F8F8F8"},{"v0":57,"v1":58,"bCoef":0.1,"cMask":["ball"],"color":"F8F8F8"},{"v0":58,"v1":59,"bCoef":0.1,"cMask":["ball"],"color":"F8F8F8"},{"v0":60,"v1":61,"bCoef":0.1,"cMask":["ball"],"color":"F8F8F8"},{"v0":61,"v1":62,"bCoef":0.1,"cMask":["ball"],"color":"F8F8F8"},{"v0":62,"v1":63,"bCoef":0.1,"cMask":["ball"],"color":"F8F8F8"},{"v0":52,"v1":53,"bCoef":0.1,"vis":false,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"v0":53,"v1":54,"bCoef":0.1,"curve":180,"curveF":6.123233995736766e-17,"cMask":["red","blue"],"cGroup":["blueKO"],"color":"F8F8F8"},{"v0":54,"v1":53,"bCoef":0.1,"curve":180,"curveF":6.123233995736766e-17,"cMask":["red","blue"],"cGroup":["redKO"],"color":"F8F8F8"},{"v0":54,"v1":55,"bCoef":0.1,"vis":false,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"v0":64,"v1":65,"bCoef":1.25,"cMask":["ball"],"color":"F8F8F8"},{"v0":66,"v1":67,"bCoef":1.25,"cMask":["ball"],"color":"F8F8F8"},{"v0":68,"v1":69,"bCoef":2,"cMask":["ball"],"color":"F8F8F8"},{"v0":70,"v1":71,"bCoef":1.25,"cMask":["ball"],"color":"F8F8F8"},{"v0":72,"v1":73,"bCoef":1.25,"cMask":["ball"],"color":"F8F8F8"},{"v0":74,"v1":75,"bCoef":0,"cMask":["ball"],"color":"F8F8F8"},{"v0":76,"v1":77,"bCoef":2,"cMask":["ball"],"color":"F8F8F8"},{"v0":78,"v1":79,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"],"color":"F8F8F8"},{"v0":80,"v1":81,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"],"color":"F8F8F8"},{"v0":96,"v1":97,"bCoef":0.1,"cMask":["ball"],"color":"F8F8F8"},{"v0":97,"v1":98,"bCoef":0.1,"cMask":["ball"],"color":"F8F8F8"},{"v0":98,"v1":99,"bCoef":0.1,"cMask":["ball"],"color":"F8F8F8"},{"v0":100,"v1":101,"bCoef":0.1,"cMask":["ball"],"color":"F8F8F8"},{"v0":101,"v1":102,"bCoef":0.1,"cMask":["ball"],"color":"F8F8F8"},{"v0":102,"v1":103,"bCoef":0.1,"cMask":["ball"],"color":"F8F8F8"},{"v0":92,"v1":93,"bCoef":0.1,"vis":false,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"v0":93,"v1":94,"bCoef":0.1,"curve":180,"curveF":6.123233995736766e-17,"cMask":["red","blue"],"cGroup":["blueKO"],"color":"F8F8F8"},{"v0":94,"v1":93,"bCoef":0.1,"curve":180,"curveF":6.123233995736766e-17,"cMask":["red","blue"],"cGroup":["redKO"],"color":"F8F8F8"},{"v0":94,"v1":95,"bCoef":0.1,"vis":false,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"v0":104,"v1":105,"bCoef":1.25,"cMask":["ball"],"color":"F8F8F8"},{"v0":106,"v1":107,"bCoef":1.25,"cMask":["ball"],"color":"F8F8F8"},{"v0":108,"v1":109,"bCoef":2,"cMask":["ball"],"color":"F8F8F8"},{"v0":110,"v1":111,"bCoef":1.25,"cMask":["ball"],"color":"F8F8F8"},{"v0":112,"v1":113,"bCoef":1.25,"cMask":["ball"],"color":"F8F8F8"},{"v0":114,"v1":115,"bCoef":0,"cMask":["ball"],"color":"F8F8F8"},{"v0":116,"v1":117,"bCoef":2,"cMask":["ball"],"color":"F8F8F8"},{"v0":118,"v1":119,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"],"color":"F8F8F8"},{"v0":120,"v1":121,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"],"color":"F8F8F8"},{"v0":136,"v1":137,"bCoef":0.1,"cMask":["ball"],"color":"7289DA"},{"v0":137,"v1":138,"bCoef":0.1,"cMask":["ball"],"color":"7289DA"},{"v0":138,"v1":139,"bCoef":0.1,"cMask":["ball"],"color":"7289DA"},{"v0":140,"v1":141,"bCoef":0.1,"cMask":["ball"],"color":"7289DA"},{"v0":141,"v1":142,"bCoef":0.1,"cMask":["ball"],"color":"7289DA"},{"v0":142,"v1":143,"bCoef":0.1,"cMask":["ball"],"color":"7289DA"},{"v0":133,"v1":134,"bCoef":0.1,"curve":180,"curveF":6.123233995736766e-17,"cMask":["red","blue"],"cGroup":["blueKO"],"color":"2A2C31"},{"v0":134,"v1":133,"bCoef":0.1,"curve":180,"curveF":6.123233995736766e-17,"cMask":["red","blue"],"cGroup":["redKO"],"color":"2A2C31"},{"v0":134,"v1":135,"bCoef":0.1,"vis":false,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"v0":144,"v1":145,"bCoef":2,"cMask":["ball"],"cGroup":["ball"],"color":"7289DA"},{"v0":146,"v1":147,"bCoef":2,"cMask":["ball"],"cGroup":["ball"],"color":"7289DA"},{"v0":148,"v1":149,"bCoef":2,"cMask":["ball"],"color":"7289DA"},{"v0":150,"v1":151,"bCoef":2,"cMask":["ball"],"color":"7289DA"},{"v0":152,"v1":153,"bCoef":2,"cMask":["ball"],"color":"7289DA"},{"v0":154,"v1":155,"bCoef":0,"cMask":["ball"],"color":"F8F8F8"},{"v0":156,"v1":157,"bCoef":2,"cMask":["ball"],"color":"7289DA"},{"v0":158,"v1":159,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"],"color":"7289DA"},{"v0":160,"v1":161,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"],"color":"7289DA"},{"v0":171,"v1":172,"bCoef":0,"curve":95,"curveF":0.9163311740174233,"cMask":[],"color":"7289DA"},{"v0":174,"v1":173,"bCoef":0,"curve":95,"curveF":0.9163311740174233,"cMask":[],"color":"7289DA"},{"v0":176,"v1":175,"bCoef":0,"curve":95,"curveF":0.9163311740174233,"cMask":[],"color":"7289DA"},{"v0":177,"v1":178,"bCoef":0,"curve":95,"curveF":0.9163311740174233,"cMask":[],"color":"7289DA"},{"v0":172,"v1":176,"bCoef":0,"cMask":[],"color":"7289DA"},{"v0":174,"v1":178,"bCoef":0,"cMask":[],"color":"7289DA"},{"v0":180,"v1":179,"bCoef":0.1,"curve":180,"curveF":6.123233995736766e-17,"cMask":[],"color":"7289DA"},{"v0":179,"v1":180,"bCoef":0.1,"curve":180,"curveF":6.123233995736766e-17,"cMask":[],"color":"7289DA"},{"v0":182,"v1":181,"bCoef":0.1,"curve":180,"curveF":6.123233995736766e-17,"cMask":[],"color":"7289DA"},{"v0":181,"v1":182,"bCoef":0.1,"curve":180,"curveF":6.123233995736766e-17,"cMask":[],"color":"7289DA"},{"v0":184,"v1":183,"bCoef":0.1,"curve":180,"curveF":6.123233995736766e-17,"cMask":[],"color":"7289DA"},{"v0":183,"v1":184,"bCoef":0.1,"curve":180,"curveF":6.123233995736766e-17,"cMask":[],"color":"7289DA"},{"v0":186,"v1":185,"bCoef":0.1,"curve":180,"curveF":6.123233995736766e-17,"cMask":[],"color":"7289DA"},{"v0":185,"v1":186,"bCoef":0.1,"curve":180,"curveF":6.123233995736766e-17,"cMask":[],"color":"7289DA"},{"v0":188,"v1":187,"bCoef":0.1,"curve":180,"curveF":6.123233995736766e-17,"cMask":[],"color":"7289DA"},{"v0":187,"v1":188,"bCoef":0.1,"curve":180,"curveF":6.123233995736766e-17,"cMask":[],"color":"7289DA"},{"v0":190,"v1":189,"bCoef":0.1,"curve":180,"curveF":6.123233995736766e-17,"cMask":[],"color":"7289DA"},{"v0":189,"v1":190,"bCoef":0.1,"curve":180,"curveF":6.123233995736766e-17,"cMask":[],"color":"7289DA"},{"v0":192,"v1":191,"bCoef":0.1,"curve":180,"curveF":6.123233995736766e-17,"cMask":[],"color":"7289DA"},{"v0":191,"v1":192,"bCoef":0.1,"curve":180,"curveF":6.123233995736766e-17,"cMask":[],"color":"7289DA"},{"v0":194,"v1":193,"bCoef":0.1,"curve":180,"curveF":6.123233995736766e-17,"cMask":[],"color":"7289DA"},{"v0":193,"v1":194,"bCoef":0.1,"curve":180,"curveF":6.123233995736766e-17,"cMask":[],"color":"7289DA"},{"v0":211,"v1":212,"bCoef":1.5,"vis":false,"cMask":["ball"],"cGroup":["ball"]},{"v0":213,"v1":214,"bCoef":1.5,"vis":false,"cMask":["ball"],"cGroup":["ball"]},{"v0":215,"v1":216,"bCoef":1.5,"vis":false,"cMask":["ball"],"cGroup":["ball"]},{"v0":217,"v1":218,"bCoef":1.5,"vis":false,"cMask":["ball"],"cGroup":["ball"]},{"v0":226,"v1":225,"bCoef":0,"curve":180,"curveF":6.123233995736766e-17,"cMask":[],"color":"7289DA"},{"v0":227,"v1":228,"bCoef":0,"curve":180,"curveF":6.123233995736766e-17,"cMask":[],"color":"7289DA"},{"v0":229,"v1":230,"bCoef":0,"cMask":[],"color":"D7D5D4"},{"v0":231,"v1":232,"bCoef":0,"cMask":[],"color":"D7D5D4"},{"v0":233,"v1":234,"bCoef":0,"cMask":[],"color":"D7D5D4"},{"v0":235,"v1":236,"bCoef":0,"cMask":[],"color":"D7D5D4"},{"v0":237,"v1":238,"bCoef":0,"cMask":[],"color":"D7D5D4"},{"v0":239,"v1":240,"bCoef":0,"cMask":[],"color":"D7D5D4"},{"v0":241,"v1":242,"bCoef":0,"cMask":[],"color":"D7D5D4"},{"v0":243,"v1":244,"bCoef":0,"cMask":[],"color":"D7D5D4"},{"v0":245,"v1":246,"bCoef":0,"cMask":[],"color":"D7D5D4"},{"v0":247,"v1":248,"bCoef":0,"cMask":[],"color":"D7D5D4"},{"v0":249,"v1":250,"bCoef":0,"cMask":[],"color":"D7D5D4"}],"planes":[{"normal":[0,1],"dist":-320,"cMask":["ball"]},{"normal":[0,-1],"dist":-320,"cMask":["ball"]},{"normal":[0,1],"dist":-350,"bCoef":0.1},{"normal":[0,-1],"dist":-350,"bCoef":0.1},{"normal":[1,0],"dist":-800,"bCoef":0.1},{"normal":[-1,0],"dist":-800,"bCoef":0.1},{"normal":[0,1],"dist":-320,"cMask":["ball"]},{"normal":[0,-1],"dist":-320,"cMask":["ball"]},{"normal":[0,1],"dist":-350,"bCoef":0.1},{"normal":[0,-1],"dist":-350,"bCoef":0.1},{"normal":[1,0],"dist":-800,"bCoef":0.1},{"normal":[-1,0],"dist":-800,"bCoef":0.1},{"normal":[0,1],"dist":-320,"cMask":["ball"]},{"normal":[0,-1],"dist":-320,"cMask":["ball"]},{"normal":[0,1],"dist":-350,"bCoef":0.1},{"normal":[0,-1],"dist":-350,"bCoef":0.1},{"normal":[1,0],"dist":-800,"bCoef":0.1},{"normal":[-1,0],"dist":-800,"bCoef":0.1},{"normal":[0,1],"dist":-320,"cMask":["ball"]},{"normal":[0,-1],"dist":-320,"cMask":["ball"]},{"normal":[0,1],"dist":-350,"bCoef":0.1},{"normal":[0,-1],"dist":-350,"bCoef":0.1},{"normal":[1,0],"dist":-800,"bCoef":0.1},{"normal":[-1,0],"dist":-800,"bCoef":0.1}],"goals":[{"p0":[-710,-85],"p1":[-710,85],"team":"red"},{"p0":[710,85],"p1":[710,-85],"team":"blue"},{"p0":[-710,-85],"p1":[-710,85],"team":"red"},{"p0":[710,85],"p1":[710,-85],"team":"blue"},{"p0":[-710,-85],"p1":[-710,85],"team":"red"},{"p0":[710,85],"p1":[710,-85],"team":"blue"},{"p0":[-710,-85],"p1":[-710,85],"team":"red"},{"p0":[710,85],"p1":[710,-85],"team":"blue"}],"discs":[{"radius":6.25,"bCoef":0.35,"invMass":1.5,"color":"FFCC00","cGroup":["ball","kick","score"]},{"pos":[-700,85],"radius":6,"invMass":0,"color":"FF0000"},{"pos":[-700,-85],"radius":6,"invMass":0,"color":"FF0000"},{"pos":[700,85],"radius":6,"invMass":0,"color":"33FF"},{"pos":[700,-85],"radius":6,"invMass":0,"color":"33FF"},{"pos":[-700,85],"radius":6,"invMass":0,"color":"FF0000"},{"pos":[-700,-85],"radius":6,"invMass":0,"color":"FF0000"},{"pos":[700,85],"radius":6,"invMass":0,"color":"33FF"},{"pos":[700,-85],"radius":6,"invMass":0,"color":"33FF"},{"pos":[-700,85],"radius":6,"invMass":0,"color":"FF0000"},{"pos":[-700,-85],"radius":6,"invMass":0,"color":"FF0000"},{"pos":[700,85],"radius":6,"invMass":0,"color":"33FF"},{"pos":[700,-85],"radius":6,"invMass":0,"color":"33FF"},{"pos":[-700,85],"radius":6,"invMass":0,"color":"FF0000"},{"pos":[-700,-85],"radius":6,"invMass":0,"color":"FF0000"},{"pos":[700,85],"radius":6,"invMass":0,"color":"33FF"},{"pos":[700,-85],"radius":6,"invMass":0,"color":"33FF"}],"playerPhysics":{"bCoef":0,"acceleration":0.11,"kickingAcceleration":0.083},"ballPhysics":"disc0","spawnDistance":350}`
+// );
 
 var stadium = JSON.parse(
     `{"name":"Classic","width":420,"height":200,"spawnDistance":277.5,"bg":{"type":"grass","width":370,"height":170,"kickOffRadius":75,"cornerRadius":0},"vertexes":[{"x":-370,"y":170,"trait":"ballArea"},{"x":-370,"y":64,"trait":"ballArea"},{"x":-370,"y":-64,"trait":"ballArea"},{"x":-370,"y":-170,"trait":"ballArea"},{"x":370,"y":170,"trait":"ballArea"},{"x":370,"y":64,"trait":"ballArea"},{"x":370,"y":-64,"trait":"ballArea"},{"x":370,"y":-170,"trait":"ballArea"},{"x":0,"y":200,"trait":"kickOffBarrier"},{"x":0,"y":75,"trait":"kickOffBarrier"},{"x":0,"y":-75,"trait":"kickOffBarrier"},{"x":0,"y":-200,"trait":"kickOffBarrier"},{"x":-380,"y":-64,"trait":"goalNet"},{"x":-400,"y":-44,"trait":"goalNet"},{"x":-400,"y":44,"trait":"goalNet"},{"x":-380,"y":64,"trait":"goalNet"},{"x":380,"y":-64,"trait":"goalNet"},{"x":400,"y":-44,"trait":"goalNet"},{"x":400,"y":44,"trait":"goalNet"},{"x":380,"y":64,"trait":"goalNet"}],"segments":[{"v0":0,"v1":1,"trait":"ballArea"},{"v0":2,"v1":3,"trait":"ballArea"},{"v0":4,"v1":5,"trait":"ballArea"},{"v0":6,"v1":7,"trait":"ballArea"},{"v0":12,"v1":13,"trait":"goalNet","curve":-90},{"v0":13,"v1":14,"trait":"goalNet"},{"v0":14,"v1":15,"trait":"goalNet","curve":-90},{"v0":16,"v1":17,"trait":"goalNet","curve":90},{"v0":17,"v1":18,"trait":"goalNet"},{"v0":18,"v1":19,"trait":"goalNet","curve":90},{"v0":8,"v1":9,"trait":"kickOffBarrier"},{"v0":9,"v1":10,"trait":"kickOffBarrier","curve":180,"cGroup":["blueKO"]},{"v0":9,"v1":10,"trait":"kickOffBarrier","curve":-180,"cGroup":["redKO"]},{"v0":10,"v1":11,"trait":"kickOffBarrier"}],"goals":[{"p0":[-370,64],"p1":[-370,-64],"team":"red"},{"p0":[370,64],"p1":[370,-64],"team":"blue"}],"discs":[{"pos":[-370,64],"trait":"goalPost","color":"FFCCCC"},{"pos":[-370,-64],"trait":"goalPost","color":"FFCCCC"},{"pos":[370,64],"trait":"goalPost","color":"CCCCFF"},{"pos":[370,-64],"trait":"goalPost","color":"CCCCFF"}],"planes":[{"normal":[0,1],"dist":-170,"trait":"ballArea"},{"normal":[0,-1],"dist":-170,"trait":"ballArea"},{"normal":[0,1],"dist":-200,"bCoef":0.1},{"normal":[0,-1],"dist":-200,"bCoef":0.1},{"normal":[1,0],"dist":-420,"bCoef":0.1},{"normal":[-1,0],"dist":-420,"bCoef":0.1}],"traits":{"ballArea":{"vis":false,"bCoef":1,"cMask":["ball"]},"goalPost":{"radius":8,"invMass":0,"bCoef":0.5},"goalNet":{"vis":true,"bCoef":0.1,"cMask":["ball"]},"kickOffBarrier":{"vis":false,"bCoef":0.1,"cGroup":["redKO","blueKO"],"cMask":["red","blue"]}}}`
@@ -292,11 +301,6 @@ function createNickCanvas() {
     nicknameCanvasCtx = a.getContext('2d', null);
 }
 
-function checkKick(player) {
-    if (player.shotReset) return !player.shooting;
-    return player.shooting;
-}
-
 function getInputs(a, b, c, d, e) {
     return a + b * 2 + c * 4 + d * 8 + e * 16;
 }
@@ -306,7 +310,7 @@ function drawPlayerDisc(player) {
     if (player.disc !== null) {
         ctx.beginPath();
         ctx.fillStyle = player.avatarPattern;
-        ctx.strokeStyle = checkKick(player) ? 'white' : 'black';
+        ctx.strokeStyle = player.checkKick() ? 'white' : 'black';
         ctx.beginPath();
         ctx.arc(
             player.disc.x,
@@ -510,95 +514,6 @@ function keyUpHandler(e) {
     });
 }
 
-function collisionTransformation(physics, vertexes = null) {
-    var cMask = physics.cMask;
-    var y = 0;
-    if (typeof cMask === 'object') {
-        cMask.forEach((x) => {
-            y |= haxball.collisionFlags[x];
-        });
-    }
-    physics.cMask = y;
-    var cGroup = physics.cGroup;
-    y = 0;
-    if (typeof cGroup === 'object') {
-        cGroup.forEach((x) => {
-            y |= haxball.collisionFlags[x];
-        });
-    }
-    physics.cGroup = y;
-    if (y == 1) physics.cGroup = 193;
-    if (physics.pos !== undefined) {
-        if (physics.x === undefined) {
-            physics.x = physics.pos[0];
-            physics.y = physics.pos[1];
-        }
-        physics.xspeed = 0;
-        physics.yspeed = 0;
-    }
-    if (physics.v0 !== undefined && vertexes !== null) {
-        physics.v0 = [vertexes[physics.v0].x, vertexes[physics.v0].y];
-        physics.v1 = [vertexes[physics.v1].x, vertexes[physics.v1].y];
-    }
-    delete physics.pos;
-    delete physics.trait;
-    return physics;
-}
-
-function getCurveFSegment(segment) {
-    var curve = segment.curve * 0.017453292519943295;
-    if (curve < 0) {
-        curve *= -1;
-        segment.curve *= 1;
-        var b = segment.v0;
-        segment.v0 = segment.v1;
-        segment.v1 = b;
-        if (segment.bias !== undefined) segment.bias = -segment.bias;
-    }
-    var liminf = 0.17435839227423353;
-    var limsup = 5.934119456780721;
-    if (curve > liminf && curve < limsup) {
-        segment.curveF = 1 / Math.tan(curve / 2);
-    }
-}
-
-function getStuffSegment(segment) {
-    if (segment.curveF !== undefined) {
-        // curveF
-        var a = { x: segment.v1[0], y: segment.v1[1] },
-            b = { x: segment.v0[0], y: segment.v0[1] },
-            c = 0.5 * (a.x - b.x),
-            a = 0.5 * (a.y - b.y),
-            b = { x: segment.v0[0], y: segment.v0[1] },
-            d = segment.curveF;
-        segment.circleCenter = [b.x + c + -a * d, b.y + a + c * d];
-        a = { x: segment.v0[0], y: segment.v0[1] };
-        b = segment.circleCenter;
-        c = a.x - b[0];
-        a = a.y - b[1];
-        segment.circleRadius = Math.sqrt(c * c + a * a);
-        c = { x: segment.v0[0], y: segment.v0[1] };
-        a = segment.circleCenter;
-        segment.v0Tan = [-(c.y - a[1]), c.x - a[0]];
-        c = segment.circleCenter;
-        a = { x: segment.v1[0], y: segment.v1[1] };
-        segment.v1Tan = [-(c[1] - a.y), c[0] - a.x];
-        if (segment.curveF <= 0) {
-            segment.v0Tan[0] *= -1;
-            segment.v0Tan[1] *= -1;
-            segment.v1Tan[0] *= -1;
-            segment.v1Tan[1] *= -1;
-        }
-    } else {
-        a = { x: segment.v0[0], y: segment.v0[1] };
-        b = { x: segment.v1[0], y: segment.v1[1] };
-        c = a.x - b.x;
-        a = -(a.y - b.y);
-        b = Math.sqrt(a * a + c * c);
-        segment.normal = [a / b, c / b];
-    }
-}
-
 function load_tile(name) {
     var tile = new Image(128, 128);
     tile.onload = function () {
@@ -618,7 +533,7 @@ function resolvePlayerMovement(player) {
             player.shooting = false;
             player.shotReset = false;
         }
-        if (checkKick(player)) {
+        if (player.checkKick()) {
             let check = false;
             discs.forEach((d) => {
                 if (
@@ -676,154 +591,15 @@ function resolvePlayerMovement(player) {
         playerDisc.xspeed =
             playerDisc.xspeed +
             direction[0] *
-                (checkKick(player)
+                (player.checkKick()
                     ? playerDisc.kickingAcceleration
                     : playerDisc.acceleration);
         playerDisc.yspeed =
             playerDisc.yspeed +
             direction[1] *
-                (checkKick(player)
+                (player.checkKick()
                     ? playerDisc.kickingAcceleration
                     : playerDisc.acceleration);
-    }
-}
-
-function resolveDVCollision(disc, vertex) {
-    var discPos = { x: disc.x, y: disc.y };
-    var vertexPos = { x: vertex.x, y: vertex.y };
-    var dist_x = discPos.x - vertexPos.x;
-    var dist_y = discPos.y - vertexPos.y;
-    var dist = dist_x * dist_x + dist_y * dist_y;
-    if (dist > 0 && dist <= disc.radius ** 2) {
-        dist = Math.sqrt(dist);
-        dist_x = dist_x / dist;
-        dist_y = dist_y / dist;
-        var lambda = disc.radius - dist;
-        disc.x = disc.x + dist_x * lambda;
-        disc.y = disc.y + dist_y * lambda;
-        var discSpeed = { x: disc.xspeed, y: disc.yspeed };
-        var speedCoef = dist_x * discSpeed.x + dist_y * discSpeed.y;
-        if (speedCoef < 0) {
-            speedCoef *= disc.bCoef * vertex.bCoef + 1;
-            disc.xspeed = disc.xspeed - dist_x * speedCoef;
-            disc.yspeed = disc.yspeed - dist_y * speedCoef;
-        }
-    }
-}
-
-function resolveDSCollision(disc, segment) {
-    var distance;
-    var coef_x;
-    var coef_y;
-    if (segment.curveF === undefined) {
-        var v0Pos = { x: segment.v0[0], y: segment.v0[1] };
-        var v1Pos = { x: segment.v1[0], y: segment.v1[1] };
-        var seg_x = v1Pos.x - v0Pos.x;
-        var seg_y = v1Pos.y - v0Pos.y;
-        var discPos = { x: disc.x, y: disc.y };
-        var dist0_x = discPos.x - v0Pos.x;
-        var dist0_y = discPos.y - v0Pos.y;
-        var dist1_x = discPos.x - v1Pos.x;
-        var dist1_y = discPos.y - v1Pos.y;
-        var g = { x: disc.x, y: disc.y };
-        if (
-            dist0_x * seg_x + dist0_y * seg_y > 0 && dist1_x * seg_x + dist1_y * seg_y < 0
-        ) {
-            var norm = normalise([
-                segment.v0[1] - segment.v1[1],
-                segment.v1[0] - segment.v0[0],
-            ]);
-            norm = { x: -norm[0], y: -norm[1] };
-            coef_x = norm.x;
-            coef_y = norm.y;
-            distance = coef_x * dist1_x + coef_y * dist1_y;
-        }
-    } else {
-        var circleC = segment.circleCenter;
-        var discPos = { x: disc.x, y: disc.y };
-        var dist_x = discPos.x - circleC[0];
-        var dist_y = discPos.y - circleC[1];
-        var tan1 = segment.v1Tan;
-        var tan0 = segment.v0Tan;
-        if (
-            (tan1[0] * dist_x + tan1[1] * dist_y > 0 && tan0[0] * dist_x + tan0[1] * dist_y > 0) == segment.curveF < 0
-        )
-            return;
-        var dist = Math.sqrt(dist_x * dist_x + dist_y * dist_y);
-        if (dist == 0) return;
-        distance = dist - segment.circleRadius;
-        coef_x = dist_x / dist;
-        coef_y = dist_y / dist;
-    }
-    var bias = segment.bias;
-    if (bias == 0 || bias == undefined) {
-        if (distance < 0) {
-            distance = -distance;
-            coef_x = -coef_x;
-            coef_y = -coef_y;
-        }
-    } else if (bias < 0) {
-        bias = -bias;
-        distance = -distance;
-        coef_x = -coef_x;
-        coef_y = -coef_y;
-        if (distance < -bias) return;
-    }
-    if (distance < disc.radius) {
-        distance = disc.radius - distance;
-        disc.x = disc.x + coef_x * distance;
-        disc.y = disc.y + coef_y * distance;
-        var discSpeed = { x: disc.xspeed, y: disc.yspeed };
-        var speedCoef = coef_x * discSpeed.x + coef_y * discSpeed.y;
-        if (speedCoef < 0) {
-            speedCoef *= disc.bCoef * segment.bCoef + 1;
-            disc.xspeed = disc.xspeed - coef_x * speedCoef;
-            disc.yspeed = disc.yspeed - coef_y * speedCoef;
-        }
-    }
-}
-
-function resolveDPCollision(disc, plane) {
-    var norm = normalise(plane.normal);
-    norm = { x: norm[0], y: norm[1] };
-    var discPos = { x: disc.x, y: disc.y };
-    var dist = plane.dist - (norm.x * discPos.x + norm.y * discPos.y) + disc.radius;
-    if (dist > 0) {
-        disc.x = disc.x + norm.x * dist;
-        disc.y = disc.y + norm.y * dist;
-        var discSpeed = { x: disc.xspeed, y: disc.yspeed };
-        var speedCoef = norm.x * discSpeed.x + norm.y * discSpeed.y;
-        if (speedCoef < 0) {
-            speedCoef *= disc.bCoef * plane.bCoef + 1;
-            disc.xspeed = disc.xspeed - norm.x * speedCoef;
-            disc.yspeed = disc.yspeed - norm.y * speedCoef;
-        }
-    }
-}
-
-function resolveDDCollision(discA, discB) {
-    var dist = Math.sqrt(Math.pow(discA.x - discB.x, 2) + Math.pow(discA.y - discB.y, 2));
-    var radiusSum = discA.radius + discB.radius;
-    if (dist > 0 && dist <= radiusSum) {
-        var normal = [(discA.x - discB.x) / dist, (discA.y - discB.y) / dist];
-        var massFactor = discA.invMass / (discA.invMass + discB.invMass);
-
-        discA.x += normal[0] * (radiusSum - dist) * massFactor;
-        discA.y += normal[1] * (radiusSum - dist) * massFactor;
-        discB.x -= normal[0] * (radiusSum - dist) * (1 - massFactor);
-        discB.y -= normal[1] * (radiusSum - dist) * (1 - massFactor);
-        
-        var relativeVelocity = [discA.xspeed - discB.xspeed, discA.yspeed - discB.yspeed];
-        var normalVelocity = relativeVelocity[0] * normal[0] + relativeVelocity[1] * normal[1];
-
-        if (normalVelocity < 0) {
-            var speedFactor = normalVelocity * (discA.bCoef * discB.bCoef + 1);
-            
-            discA.xspeed = discA.xspeed - normal[0] * speedFactor * massFactor;
-            discA.yspeed = discA.yspeed - normal[1] * speedFactor * massFactor;
-            discB.xspeed = discB.xspeed + normal[0] * speedFactor * (1 - massFactor);
-            discB.yspeed = discB.yspeed + normal[1] * speedFactor * (1 - massFactor);
-        }
     }
 }
 

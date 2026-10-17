@@ -65,4 +65,9 @@ export class Player extends Disc {
         if (controls != undefined) this.controls = controls;
         if (bot != undefined) this.bot = bot;
     }
+
+    checkKick() {
+        if (this.shotReset) return !this.shooting;
+        return this.shooting;
+    }
 }
