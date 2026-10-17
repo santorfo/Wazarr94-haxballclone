@@ -11,7 +11,18 @@ import { normVec, dist, normalise,
   normArr, normObj, pointDistance,
   deepEqual } from './src/util/MathUtils.js';
 
-import { Input, Kick, Team, zoom_levels } from './src/core/Constants.js';
+import { Input, Kick, haxball, zoom_levels } from './src/core/Constants.js';
+
+import { Disc } from './src/entities/Disc.js';
+import { Player } from './src/entities/Player.js';
+import { Game } from './src/core/Game.js';
+
+import {
+    getRGBA, getDecimalFromRGB, getAvatarPattern,
+    drawTextNickCanvas, createAvatarCanvas
+} from './src/render/AvatarUtils.js';
+
+import { saveRecording, loadFileRec, downloadRec, downloadFile, watchLastGame, handleFile } from './src/systems/Recording.js';
 
 if (localStorage.getItem('rec') == null) localStorage.setItem('rec', '0');
 
@@ -33,212 +44,6 @@ var bg_patterns = {};
 
 var canvas_rect = [-150, -75, 150, 75];
 
-//===== Haxball Values
-
-function Player() {}
-function Disc() {}
-function Game() {}
-
-Disc.prototype = {
-    ballPhysics: function () {
-        this.radius = 10;
-        this.bCoef = 0.5;
-        this.invMass = 1;
-        this.damping = 0.99;
-        this.color = 'FFFFFF';
-        this.x = 0;
-        this.y = 0;
-        this.xspeed = 0;
-        this.yspeed = 0;
-        this.cGroup = 193;
-        this.cMask = 63;
-    },
-    playerPhysics: function () {
-        this.radius = 2;
-        this.bCoef = 0.5;
-        this.invMass = 0.5;
-        this.damping = 0.96;
-        this.acceleration = 0.1;
-        this.kickingAcceleration = 0.07;
-        this.kickingDamping = 0.96;
-        this.kickStrength = 5;
-        this.color = 'FFFFFF';
-        this.x = 0;
-        this.y = 0;
-        this.xspeed = 0;
-        this.yspeed = 0;
-        this.cGroup = 0;
-        this.cMask = 39;
-    },
-};
-
-Game.prototype = {
-    init: function () {
-        this.state = 0;
-        this.start = true;
-        this.timeout = 0;
-        this.timeLimit = 1;
-        this.scoreLimit = 1;
-        this.kickoffReset = 8;
-        this.red = 0;
-        this.blue = 0;
-        this.time = 0;
-        this.teamGoal = haxball.Team.SPECTATORS;
-    },
-};
-
-Player.prototype = {
-    default: function () {
-        this.disc = null;
-        this.name = 'Player';
-        this.team = haxball.Team.SPECTATORS;
-        this.avatar = '';
-        var a = window.document.createElement('canvas');
-        var b = window.document.createElement('canvas');
-        this.avatarContext = a.getContext('2d', null);
-        this.avatarPattern = getAvatarPattern(this.avatarContext, this.avatar, [
-            getRGBA(haxball.Team.BLUE.color),
-        ]);
-        this.nicknameCanvasContext = drawTextNickCanvas(
-            b.getContext('2d', null),
-            this.name
-        );
-        this.inputs = 0;
-        this.shooting = false;
-        this.shotReset = false;
-        this.spawnPoint = 0;
-        this.controls = [
-            ['ArrowUp'],
-            ['ArrowLeft'],
-            ['ArrowDown'],
-            ['ArrowRight'],
-            ['KeyX'],
-        ];
-        this.bot = false;
-    },
-    init: function (name, avatar, team, controls, bot = false) {
-        this.default();
-        if (name != undefined) {
-            this.name = name;
-            var b = window.document.createElement('canvas');
-            this.nicknameCanvasContext = drawTextNickCanvas(
-                b.getContext('2d', null),
-                name
-            );
-        }
-        if (team != undefined) {
-            this.team = team;
-        }
-        if (avatar != undefined) {
-            this.avatar = avatar;
-            this.avatarContext = createAvatarCanvas();
-            this.avatarPattern = getAvatarPattern(
-                this.avatarContext,
-                this.avatar,
-                this.team === haxball.Team.BLUE
-                    ? [getDecimalFromRGB(haxball.Team.BLUE.color)]
-                    : [getDecimalFromRGB(haxball.Team.RED.color)]
-            );
-        }
-        if (controls != undefined) this.controls = controls;
-        if (bot != undefined) this.bot = bot;
-    },
-};
-// values hardcoded in haxball
-var haxball = {
-    hockey: {
-        bg_color: 'rgb(85, 85, 85)',
-        border_color: 'rgb(233,204,110)',
-    },
-    grass: {
-        bg_color: 'rgb(113,140,90)',
-        border_color: 'rgb(199,230,189)',
-    },
-    segment_color: 'rgb(0,0,0)',
-    Team: {
-        RED: {
-            name: 't-red',
-            id: 1,
-            color: 'rgb(229, 110, 86)',
-            cGroup: 2,
-        },
-        BLUE: {
-            name: 't-blue',
-            id: 2,
-            color: 'rgb(86,137,229)',
-            cGroup: 4,
-        },
-        SPECTATORS: {
-            name: 't-spectators',
-            id: 0,
-            color: null,
-            cGroup: 0,
-        },
-    },
-    playerPhysics: {
-        radius: 15,
-        bCoef: 0.5,
-        invMass: 0.5,
-        damping: 0.96,
-        acceleration: 0.1,
-        kickingAcceleration: 0.07,
-        kickingDamping: 0.96,
-        kickStrength: 5,
-        pos: [0, 0],
-        cMask: ['all'],
-        cGroup: [''],
-    },
-    ballPhysics: {
-        radius: 10,
-        bCoef: 0.5,
-        invMass: 1,
-        damping: 0.99,
-        color: 'FFFFFF',
-        pos: [0, 0],
-        cMask: ['all'],
-        cGroup: ['ball'],
-    },
-    discPhysics: {
-        radius: 10,
-        bCoef: 0.5,
-        invMass: 0,
-        damping: 0.99,
-        color: 'rgb(255,255,255)',
-        cMask: ['all'],
-        cGroup: ['all'],
-    },
-    segmentPhysics: {
-        curve: 0,
-        bCoef: 1,
-        cGroup: ['wall'],
-        cMask: ['all'],
-    },
-    planePhysics: {
-        bCoef: 1,
-        cGroup: ['wall'],
-        cMask: ['all'],
-    },
-    vertexPhysics: {
-        bCoef: 1,
-        cGroup: ['wall'],
-        cMask: ['all'],
-    },
-    collisionFlags: {
-        all: 63,
-        ball: 1,
-        blue: 4,
-        blueKO: 16,
-        c0: 268435456,
-        c1: 536870912,
-        c2: 1073741824,
-        c3: -2147483648,
-        kick: 64,
-        red: 2,
-        redKO: 8,
-        score: 128,
-        wall: 32,
-    },
-};
 
 var zoom = zoom_levels[4];
 
@@ -479,56 +284,6 @@ function getTeamByID(id) {
         : haxball.Team.BLUE;
 }
 
-function downloadFile(file, fileName) {
-    var c = window.document.createElement('a');
-    c.style.display = 'display: none';
-    window.document.body.appendChild(c);
-    var d = URL.createObjectURL(file);
-    c.href = d;
-    c.download = fileName;
-    c.click();
-    URL.revokeObjectURL(d);
-    c.remove();
-}
-
-function downloadRec(rec, fileName) {
-    downloadFile(
-        new Blob([rec], {
-            type: 'octet/stream',
-        }),
-        fileName
-    );
-}
-
-function saveRecording(rec) {
-    var d = new Date();
-    downloadRec(
-        rec,
-        `HBReplay-${d.getFullYear()}-${
-            d.getMonth() + 1
-        }-${d.getDate()}-${d.getHours()}h${d.getMinutes()}m.hbar`
-    );
-}
-
-function watchLastGame() {
-    if (localStorage.getItem('last') != null) {
-        localStorage.setItem('rec', '1');
-        document.location.reload(true);
-    }
-}
-
-function handleFile() {
-    var file = input.files[0];
-    fileread.readAsArrayBuffer(file);
-}
-
-function loadFileRec() {
-    var replay = msgpack.deserialize(new Uint8Array(fileread.result));
-    localStorage.setItem('file', JSON.stringify(replay));
-    localStorage.setItem('rec', '2');
-    document.location.reload(true);
-}
-
 function createNickCanvas() {
     // canvas for nickname
     var a = window.document.createElement('canvas');
@@ -537,60 +292,13 @@ function createNickCanvas() {
     nicknameCanvasCtx = a.getContext('2d', null);
 }
 
-function createAvatarCanvas() {
-    let avatarCanvasCtx;
-    // canvas for avatar
-    var a = window.document.createElement('canvas');
-    a.width = 64;
-    a.height = 64;
-    return (avatarCanvasCtx = a.getContext('2d', null));
-}
-
 function checkKick(player) {
     if (player.shotReset) return !player.shooting;
     return player.shooting;
 }
 
-function getRGBA(a) {
-    return (
-        'rgba(' +
-        [(a & 16711680) >>> 16, (a & 65280) >>> 8, a & 255].join() +
-        ',255)'
-    );
-}
-
 function getInputs(a, b, c, d, e) {
     return a + b * 2 + c * 4 + d * 8 + e * 16;
-}
-
-function getDecimalFromRGB(a) {
-    var b = a.substring(4, a.length - 1).split(',');
-    return (parseInt(b[0]) << 16) + (parseInt(b[1]) << 8) + parseInt(b[2]);
-}
-
-function getAvatarPattern(ctx, avatar, colors) {
-    if (colors.length > 0) {
-        ctx.save();
-        ctx.translate(32, 32);
-        ctx.rotate((3.141592653589793 * 32) / 128);
-        for (
-            var c = -32, d = 64 / colors.length, e = 0;
-            e < colors.length;
-            e++
-        ) {
-            ctx.fillStyle = getRGBA(colors[e]);
-            ctx.fillRect(c, -32, d + 4, 64);
-            c += d;
-        }
-        ctx.restore();
-        ctx.fillStyle = 'white';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'alphabetic';
-        ctx.font = "900 34px 'Arial Black','Arial Bold',Gadget,sans-serif";
-        ctx.fillText(avatar.substring(0, 2), 32, 44);
-        var avatarPattern = ctx.createPattern(ctx.canvas, 'no-repeat');
-        return avatarPattern;
-    }
 }
 
 function drawPlayerDisc(player) {
@@ -636,23 +344,6 @@ function drawPlayerDiscExtLine(player) {
         ctx.stroke();
         ctx.globalAlpha = 1;
     }
-}
-
-function drawTextNickCanvas(ctx, nickname) {
-    // draw text in nickname canvas
-    ctx.resetTransform();
-    ctx.clearRect(0, 0, 160, 34);
-    ctx.font = '26px sans-serif';
-    ctx.fillStyle = 'white';
-    if (ctx.measureText(nickname).width > 160) {
-        ctx.textAlign = 'left';
-        ctx.translate(2, 29);
-    } else {
-        ctx.textAlign = 'center';
-        ctx.translate(80, 29);
-    }
-    ctx.fillText(nickname, 0, 0);
-    return ctx;
 }
 
 function insertNickCanvasGlobalCanvas(globalCtx, nickCtx, x, y) {
